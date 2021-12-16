@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-export default calendar = (req, res) => {
+export default function calendar(req, res) {
     if (req.method !== 'POST') {
         return res.status(400).send('');
     }
