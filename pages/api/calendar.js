@@ -1,11 +1,21 @@
 import Axios from 'axios';
 
-export default function calendar(req, res) {
+export default function handler(req, res) {
     if (req.method !== 'POST') {
-        return res.status(400).send('');
+        return res.status(400).send('Invalid request');
     }
 
     // Obtain the information from the request and put it on
+    let body;
+    if (typeof req.body === 'string') {
+        body = JSON.parse(req.body);
+    } else {
+        body = req.body;
+    }
+    const startTime = body.start;
+    const endTime = body.end;
+    const description = "Note: Please ensure you've completed the safety training and wear long sleeved clothes and closed toe shoes if you will be working with chemicals.\n\n" + body.description;
+    const title = body.title;
 
     // Get Access token
     GetAccessToken(res).then((accessToken) => {
@@ -19,7 +29,7 @@ export default function calendar(req, res) {
                 // Make the reservation
                 MakeReservation(res, calendarID, accessToken, startTime, endTime, description, title);
             } else {
-                res.status(409).send(''); // 409: conflict status code. There was a conflict with overlapping times. Likely not an issue with the code
+                res.status(409).send('Conflicting times with another reservation'); // 409: conflict status code. There was a conflict with overlapping times. Likely not an issue with the code
             }
         });
     });
@@ -36,7 +46,8 @@ const GetAccessToken = async (res) => {
         });
         return res.data.access_token;
     } catch (error) {
-        res.status(500).send({error: 'Failed to get Access Token'}); // 500 error. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
+        console.error(error)
+        res.status(500).send({error: 'Failed to get Access Token. Please contact the site admin.'}); // 500 error. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
     }
 }
 
@@ -64,23 +75,33 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
         });
 
         // Parse response and check if there are conflicts
-        // TODO: Check if not busy length is 0
-        return res.data.calendars.busy.length != 0 ? false : true;
+        // console.log("Here it is")
+        // console.log(res.data);
+        // console.log(res.data.calendars);
+        // console.log(res.data.calendars[''].busy);
+        // console.log("Bye bye")
+        return res.data.calendars[''].busy.length === 0;
     } catch (error) {
         console.error(error);
-        res.status(500).send('Unable to check availability'); // Checking availability encountered an error. Debug CheckAvailability. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
+        res.status(500).send('Unable to check availability. Please contact the site admin.'); // Checking availability encountered an error. Debug CheckAvailability. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
     }
 }
 
 const MakeReservation = async (res, calendarId, accessToken, startTime, endTime, description, title) => {
     try {
-        const res = await Axios.post(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${process.env.GOOGLE_API_KEY}`, {
-            // Event request body
-            "end": endTime,
-            "start": startTime,
-            "description": description, // Description of event
-            "summary": title            // Title of event
-        }, {
+        const eventResource = {
+            start: {
+                dateTime: startTime,
+                timeZone: 'America/Los_Angeles',
+            },
+            end: {
+                dateTime: endTime,
+                timeZone: 'America/Los_Angeles',
+            },
+            description: description,
+            summary: title
+        }
+        await Axios.post(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${process.env.GOOGLE_API_KEY}`, eventResource, {
             // Authorization header
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -89,8 +110,6 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
         res.status(201).send('Reservation successfully created');
     } catch(error) {
         console.error(error);
-        res.status(502); // 502 error, something went wrong when making the reservation with the post request. Debug MakeReservation, ensure that the Google API has not changed
+        res.status(502).send('Unable to make reservation for an unknown reason. Contact the site admin.'); // 502 error, something went wrong when making the reservation with the post request. Debug MakeReservation, ensure that the Google API has not changed
     }
 }
-
-// TODO: Parse Axios POST responses, test Reservation, figure out if error codes send when they are supposed to, test whether API can be called via Postman
