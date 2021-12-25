@@ -10,7 +10,23 @@ const publicUrl = "https://calendar.google.com/calendar/embed?src=cscae19m9abei8
 const fromFields = { name: "UCSB AIChE", email: "ucsb.aiche@gmail.com" };
 const AIChEEmail = "ucsb.aiche@gmail.com";
 
-export default function handler(req, res) {
+// Enable CORS: https://vercel.com/support/articles/how-to-enable-cors
+const allowCors = fn => async (req, res) => {
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    )
+    if (req.method === 'OPTIONS') {
+        res.status(200).end()
+        return
+    }
+    return await fn(req, res);
+}
+
+function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(400).send('Invalid request');
     }
@@ -159,3 +175,5 @@ const useSendgrid = (sgMail, mail) => {
         console.error('send-grid-error: ', error.toString());
     });
 }
+
+module.exports = allowCors(handler);
