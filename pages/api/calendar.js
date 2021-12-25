@@ -82,13 +82,13 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
         });
 
         // Parse response and check if there are conflicts
-        console.log("Here it is")
+        // console.log("Here it is")
         // console.log(res.data);
         // console.log(res.data.calendars);
         // console.log(res.data.calendars[''].busy);
         // console.log("Bye bye")
-        console.log(res.data.calendars['']);
-        return res.data.calendars[''].busy.length === 0;
+        // console.log(res.data.calendars[calendarId]);
+        return res.data.calendars[calendarId].busy.length === 0;
     } catch (error) {
         console.error(error);
         res.status(500).send('Unable to check availability. Please contact the site admin.'); // Checking availability encountered an error. Debug CheckAvailability. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
