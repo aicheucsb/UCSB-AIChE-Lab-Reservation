@@ -72,7 +72,7 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
             "timeMin": startTime,
             "timeMax": endTime,
             "items": [
-                {calendarId}
+                {id: calendarId}
             ]
         }, {
             // Authorization header
@@ -82,11 +82,12 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
         });
 
         // Parse response and check if there are conflicts
-        // console.log("Here it is")
+        console.log("Here it is")
         // console.log(res.data);
         // console.log(res.data.calendars);
         // console.log(res.data.calendars[''].busy);
         // console.log("Bye bye")
+        console.log(res.data.calendars['']);
         return res.data.calendars[''].busy.length === 0;
     } catch (error) {
         console.error(error);
@@ -115,6 +116,7 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
             }
         });
         res.status(201).send('Reservation successfully created');
+        return
     } catch(error) {
         console.error(error);
         res.status(502).send('Unable to make reservation for an unknown reason. Contact the site admin.'); // 502 error, something went wrong when making the reservation with the post request. Debug MakeReservation, ensure that the Google API has not changed
@@ -122,6 +124,7 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
 }
 
 const SendConfirmationEmail = async (email, name, startTime, endTime) => {
+    console.log("Generating email");
     const templateID = "d-40d8dc5bc87a4f0e8faa212df7118d89";
     const mail = {
         to: email,
