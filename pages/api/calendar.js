@@ -38,7 +38,7 @@ export default function handler(req, res) {
             if (available) {
                 // Make the reservation
                 MakeReservation(res, calendarID, accessToken, startTime, endTime, description, title).then(() => {
-                    SendConfirmationEmail(body.email, moment(startTime).format('MMMM Do YYYY, h:mm a'), moment(startTime).format('MMMM Do YYYY, h:mm a'))
+                    SendConfirmationEmail(body.email, body.name, moment(startTime).format('MMMM Do YYYY, h:mm a'), moment(startTime).format('MMMM Do YYYY, h:mm a'));
                 });
             } else {
                 res.status(409).send('Conflicting times with another reservation'); // 409: conflict status code. There was a conflict with overlapping times. Likely not an issue with the code
