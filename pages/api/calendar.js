@@ -2,6 +2,8 @@ import Axios from 'axios';
 import sgMail from '@sendgrid/mail';
 import moment from 'moment';
 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 // calendar public URL
 const publicUrl = "https://calendar.google.com/calendar/embed?src=cscae19m9abei8bv23e1queim8%40group.calendar.google.com&ctz=America%2FLos_Angeles";
 
