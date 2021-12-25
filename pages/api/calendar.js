@@ -1,4 +1,12 @@
 import Axios from 'axios';
+import sgMail from '@sendgrid/mail';
+import moment from 'moment';
+
+// calendar public URL
+const publicUrl = "https://calendar.google.com/calendar/embed?src=cscae19m9abei8bv23e1queim8%40group.calendar.google.com&ctz=America%2FLos_Angeles";
+
+const fromFields = { name: "UCSB AIChE", email: "ucsb.aiche@gmail.com" };
+const AIChEEmail = "ucsb.aiche@gmail.com";
 
 export default function handler(req, res) {
     if (req.method !== 'POST') {
@@ -27,7 +35,9 @@ export default function handler(req, res) {
         CheckAvailability(res, calendarID, accessToken, startTime, endTime).then((available) => {
             if (available) {
                 // Make the reservation
-                MakeReservation(res, calendarID, accessToken, startTime, endTime, description, title);
+                MakeReservation(res, calendarID, accessToken, startTime, endTime, description, title).then(() => {
+                    SendConfirmationEmail(body.email, moment(startTime).format('MMMM Do YYYY, h:mm a'), moment(startTime).format('MMMM Do YYYY, h:mm a'))
+                });
             } else {
                 res.status(409).send('Conflicting times with another reservation'); // 409: conflict status code. There was a conflict with overlapping times. Likely not an issue with the code
             }
@@ -47,13 +57,8 @@ const GetAccessToken = async (res) => {
         return res.data.access_token;
     } catch (error) {
         console.error(error)
-        res.status(500).send({error: 'Failed to get Access Token. Please contact the site admin.'}); // 500 error. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
+        res.status(500).send({error: 'Failed to get Access Token. Refresh Token likely expired. Please contact the site admin.'}); // 500 error. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
     }
-}
-
-const FormatTime = (time) => {
-    // Format the time in RFC3330: https://datatracker.ietf.org/doc/html/rfc3339
-
 }
 
 const CheckAvailability = async (res, calendarId, accessToken, startTime, endTime) => {
@@ -112,4 +117,34 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
         console.error(error);
         res.status(502).send('Unable to make reservation for an unknown reason. Contact the site admin.'); // 502 error, something went wrong when making the reservation with the post request. Debug MakeReservation, ensure that the Google API has not changed
     }
+}
+
+const SendConfirmationEmail = async (email, name, startTime, endTime) => {
+    const templateID = "d-40d8dc5bc87a4f0e8faa212df7118d89";
+    const mail = {
+        to: email,
+        bcc: AIChEEmail,
+        from: fromFields,
+        template_id: templateID,
+        dynamic_template_data: {
+            name: name,
+            startTime: startTime,
+            endTime: endTime,
+            publicUrl: publicUrl
+        }
+    }
+
+    useSendgrid(sgMail, mail);
+}
+
+const useSendgrid = (sgMail, mail) => {
+    sgMail.send(mail)
+    .then(() => {
+        console.log('Email sent')
+        // console.log('mail-sent-successfully', { templateId, dynamic_template_data });
+        // console.log('response', response);
+    })
+    .catch((error) => {
+        console.error('send-grid-error: ', error.toString());
+    });
 }
