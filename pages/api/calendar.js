@@ -44,6 +44,12 @@ export default function handler(req, res) {
                 res.status(409).send('Conflicting times with another reservation'); // 409: conflict status code. There was a conflict with overlapping times. Likely not an issue with the code
             }
         });
+    }).catch((error) => {
+        if (error.response) {
+            console.error("Request error status: ", error.response.status);
+            console.error("Request error data: ", error.response.data);
+            console.error("Request error headers: ", error.response.headers)
+        }
     });
 }
 
