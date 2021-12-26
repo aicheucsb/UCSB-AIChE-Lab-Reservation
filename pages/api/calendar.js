@@ -121,11 +121,11 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
         const eventResource = {
             start: {
                 dateTime: startTime,
-                // timeZone: 'America/Los_Angeles',
+                timeZone: 'America/Los_Angeles',
             },
             end: {
                 dateTime: endTime,
-                // timeZone: 'America/Los_Angeles',
+                timeZone: 'America/Los_Angeles',
             },
             description: description,
             summary: title
