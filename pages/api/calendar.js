@@ -81,7 +81,7 @@ const GetAccessToken = async (res) => {
         return res.data.access_token;
     } catch (error) {
         console.error(error)
-        res.status(500).send({error: 'Failed to get Access Token. Refresh Token likely expired. Please contact the site admin.'}); // 500 error. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
+        res.status(500).send('Failed to get Access Token. Refresh Token likely expired. Please contact the site admin.'); // 500 error. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
     }
 }
 
