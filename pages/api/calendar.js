@@ -61,14 +61,7 @@ function handler(req, res) {
             }
         });
     }).catch((error) => {
-        if (error.response) {
-            console.error("Request error");
-            console.error("Request error status: ", error.response.status);
-            console.error("Request error data: ", error.response.data);
-            console.error("Request error headers: ", error.response.headers);
-        } else {
-            console.error(error);
-        }
+        PrintError(error);
     });
 }
 
@@ -104,6 +97,9 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
+        }).catch((error) => {
+            PrintError(error);
+            res.status(500).send('Unable to check availability. Please contact the site admin.')
         });
 
         // Parse response and check if there are conflicts
@@ -180,3 +176,14 @@ const useSendgrid = (sgMail, mail) => {
 }
 
 module.exports = allowCors(handler);
+
+const PrintError = (error) => {
+    if (error.response) {
+        console.error("Request error");
+        console.error("Request error status: ", error.response.status);
+        console.error("Request error data: ", error.response.data);
+        console.error("Request error headers: ", error.response.headers);
+    } else {
+        console.error(error);
+    }
+}

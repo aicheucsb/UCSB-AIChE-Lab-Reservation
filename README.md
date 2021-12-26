@@ -1,6 +1,7 @@
 
 ## Resources Used
 * Vercel with NextJS to make serverless functions: https://madewithlove.com/blog/software-engineering/serverless-functions-with-vercel/
+* CORS: https://vercel.com/support/articles/how-to-enable-cors#enabling-cors-using-vercel.json and https://stackoverflow.com/questions/65058598/nextjs-cors-issue
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
