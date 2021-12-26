@@ -13,7 +13,7 @@ const AIChEEmail = "ucsb.aiche@gmail.com";
 // Enable CORS: https://vercel.com/support/articles/how-to-enable-cors
 const allowCors = fn => async (req, res) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
     res.setHeader(
         'Access-Control-Allow-Headers',
@@ -62,9 +62,12 @@ function handler(req, res) {
         });
     }).catch((error) => {
         if (error.response) {
+            console.error("Request error");
             console.error("Request error status: ", error.response.status);
             console.error("Request error data: ", error.response.data);
-            console.error("Request error headers: ", error.response.headers)
+            console.error("Request error headers: ", error.response.headers);
+        } else {
+            console.error(error);
         }
     });
 }
