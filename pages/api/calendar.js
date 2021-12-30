@@ -103,12 +103,6 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
         });
 
         // Parse response and check if there are conflicts
-        // console.log("Here it is")
-        // console.log(res.data);
-        // console.log(res.data.calendars);
-        // console.log(res.data.calendars[''].busy);
-        // console.log("Bye bye")
-        // console.log(res.data.calendars[calendarId]);
         return res.data.calendars[calendarId].busy.length === 0;
     } catch (error) {
         console.error(error);
