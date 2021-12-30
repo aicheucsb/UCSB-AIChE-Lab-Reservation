@@ -38,6 +38,7 @@ function handler(req, res) {
     } else {
         body = req.body;
     }
+    console.log("Got new request: ", body);
     const startTime = body.start;
     const endTime = body.end;
     const description = "Note: Please ensure you've completed the safety training and wear long sleeved clothes and closed toe shoes if you will be working with chemicals.\n\n" + body.description;
