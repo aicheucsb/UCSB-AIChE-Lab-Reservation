@@ -11,8 +11,8 @@ const AIChEEmail = "ucsb.aiche@gmail.com";
  * 
  * @param {*} email address to send the confirmation email to
  * @param {*} name name on the email
- * @param {*} startTime starting time of the reservation
- * @param {*} endTime ending time of the reservation
+ * @param {*} startTime starting time of the reservation in format for the user to see
+ * @param {*} endTime ending time of the reservation in format for the user to see
  */
 export const SendConfirmationEmail = async (email, name, startTime, endTime) => {
     console.log("Generating email");

@@ -51,7 +51,8 @@ function handler(req, res) {
         CheckAvailability(res, calendarID, accessToken, momentStart, momentEnd).then((available) => {
             if (available) {
                 // Make the reservation
-                MakeReservation(res, calendarID, accessToken, momentStart, momentEnd, description, title).then(() => {
+                // convert the original startTime and endTime since adjustForDST offsets it
+                MakeReservation(res, calendarID, accessToken, moment(startTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'), moment(endTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'), description, title).then(() => {
                     SendConfirmationEmail(body.email, body.name, momentStart, momentEnd);
                 });
             } else {
