@@ -53,8 +53,8 @@ function handler(req, res) {
             if (available) {
                 // Make the reservation
                 // convert the original startTime and endTime since adjustForDST offsets it
-                MakeReservation(res, calendarID, accessToken, moment(startTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'), moment(endTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'), description, title).then(() => {
-                    SendConfirmationEmail(body.email, body.name, momentStart, momentEnd);
+                MakeReservation(res, calendarID, accessToken, momentStart, momentEnd, description, title).then(() => {
+                    SendConfirmationEmail(body.email, body.name, moment(startTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'), moment(endTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'));
                 });
             } else {
                 res.status(409).send('Conflicting times with another reservation'); // 409: conflict status code. There was a conflict with overlapping times. Likely not an issue with the code
