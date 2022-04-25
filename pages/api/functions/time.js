@@ -9,8 +9,7 @@ export const adjustForDST = (time) => {
     const formatted = moment(time).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a');
     if (moment(time).tz('America/Los_Angeles').isDST()) {
         // subtract 1 hour
-        const adjusted = moment(time).tz('America/Los_Angeles').subtract(2, "hour").format('MMMM Do YYYY, h:mm a'); // for some reason despite subtracting 1 hour, the time does not change when it goes to google api
-        console.log(`${time} is detected to be in Daylight Savings time, subtracting 1 hour`)
+        const adjusted = moment(time).tz('America/Los_Angeles').subtract(1, "hour").format('MMMM Do YYYY, h:mm a');
         console.log(`Not DST: ${formatted} to adjusted for DST: ${adjusted}`);
         return adjusted;
     } else {
