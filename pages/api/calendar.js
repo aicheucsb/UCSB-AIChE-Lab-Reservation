@@ -1,14 +1,7 @@
 import Axios from 'axios';
-import sgMail from '@sendgrid/mail';
-import moment from 'moment-timezone';
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-// calendar public URL
-const publicUrl = "https://calendar.google.com/calendar/embed?src=cscae19m9abei8bv23e1queim8%40group.calendar.google.com&ctz=America%2FLos_Angeles";
-
-const fromFields = { name: "UCSB AIChE", email: "ucsb.aiche@gmail.com" };
-const AIChEEmail = "ucsb.aiche@gmail.com";
+import { PrintError } from 'functions/util.js';
+import { adjustForDST } from 'functions/time.js'
+import { SendConfirmationEmail } from 'functions/email.js'
 
 // Enable CORS: https://vercel.com/support/articles/how-to-enable-cors
 const allowCors = fn => async (req, res) => {
@@ -143,67 +136,4 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
     }
 }
 
-const SendConfirmationEmail = async (email, name, startTime, endTime) => {
-    console.log("Generating email");
-    const templateID = "d-40d8dc5bc87a4f0e8faa212df7118d89";
-    const mail = {
-        to: email,
-        bcc: AIChEEmail,
-        from: fromFields,
-        template_id: templateID,
-        dynamic_template_data: {
-            name: name,
-            startTime: startTime,
-            endTime: endTime,
-            publicUrl: publicUrl
-        }
-    }
-
-    useSendgrid(sgMail, mail);
-}
-
-const useSendgrid = (sgMail, mail) => {
-    sgMail.send(mail)
-        .then(() => {
-            console.log('Email sent')
-            // console.log('mail-sent-successfully', { templateId, dynamic_template_data });
-            // console.log('response', response);
-        })
-        .catch((error) => {
-            console.error('send-grid-error: ', error.toString());
-        });
-}
-
 module.exports = allowCors(handler);
-
-const PrintError = (error) => {
-    if (error.response) {
-        console.error("Request error");
-        console.error("Request error status: ", error.response.status);
-        console.error("Request error data: ", error.response.data);
-        console.error("Request error headers: ", error.response.headers);
-    } else {
-        console.error(error);
-    }
-}
-
-/**
- * 
- * @param {*} time a string representing the date. For example: '2022-01-24T07:06:00-08:00'
- * @returns a date formatted in MMMM DO YYYY, h:mm a. For example: January 24th 2022, 6:06 am
- */
-const adjustForDST = (time) => {
-    const formatted = moment(time).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a');
-    if (moment(time).isDST()) {
-        // subtract 1 hour
-        const adjusted = moment(time).tz('America/Los_Angeles').subtract(1, "hour").format('MMMM Do YYYY, h:mm a');
-        console.log(`${time} is detected to be in Daylight Savings time, subtracting 1 hour`)
-        console.log(`Not DST: ${formatted} to adjusted for DST: ${adjusted}`);
-        return adjusted;
-    } else {
-        // don't subtract
-        console.log(`${time} is not in Daylight savings`);
-        console.log(`Formatting time to: ${formatted}`)
-        return formatted;
-    }
-}
