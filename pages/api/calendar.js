@@ -1,7 +1,7 @@
 import Axios from 'axios';
-import { PrintError } from 'functions/util.js';
-import { adjustForDST } from 'functions/time.js'
-import { SendConfirmationEmail } from 'functions/email.js'
+import { PrintError } from './functions/util.js';
+import { adjustForDST } from './functions/time.js'
+import { SendConfirmationEmail } from './functions/email.js'
 
 // Enable CORS: https://vercel.com/support/articles/how-to-enable-cors
 const allowCors = fn => async (req, res) => {
