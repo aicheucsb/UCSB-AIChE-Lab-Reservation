@@ -39,7 +39,7 @@ function handler(req, res) {
         body = req.body;
     }
     console.log("Got new request: ", body);
-    const startTime = body.start;
+    const startTime = body.start; // these look like: '2022-04-25T07:06:00-08:00' YYYY-MM-DDTHH:mm:ssZ format
     const endTime = body.end;
     const description = "Note: Please ensure you've completed the safety training and wear long sleeved clothes and closed toe shoes if you will be working with chemicals.\n\n" + body.description;
     const title = body.title;
@@ -50,12 +50,16 @@ function handler(req, res) {
         // CalendarID is needed to get the calendar
         // If you delete and remake the calendar, you must get the ID again using API Explorer and paste it in inside of const calendarID
 
+        // Convert to the google calendar friendly time while checking if DST
+        const momentStart = adjustForDST(startTime);
+        const momentEnd = adjustForDST(endTime);
+
         // Check availability of the time
         CheckAvailability(res, calendarID, accessToken, startTime, endTime).then((available) => {
             if (available) {
                 // Make the reservation
                 MakeReservation(res, calendarID, accessToken, startTime, endTime, description, title).then(() => {
-                    SendConfirmationEmail(body.email, body.name, moment(startTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'), moment(endTime).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a'));
+                    SendConfirmationEmail(body.email, body.name, momentStart, momentEnd);
                 });
             } else {
                 res.status(409).send('Conflicting times with another reservation'); // 409: conflict status code. There was a conflict with overlapping times. Likely not an issue with the code
@@ -91,7 +95,7 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
             "timeMin": startTime,
             "timeMax": endTime,
             "items": [
-                {id: calendarId}
+                { id: calendarId }
             ]
         }, {
             // Authorization header
@@ -133,7 +137,7 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
         });
         res.status(201).send('Reservation successfully created');
         return
-    } catch(error) {
+    } catch (error) {
         PrintError(error);
         res.status(502).send('Unable to make reservation for an unknown reason. Contact the site admin.'); // 502 error, something went wrong when making the reservation with the post request. Debug MakeReservation, ensure that the Google API has not changed
     }
@@ -160,14 +164,14 @@ const SendConfirmationEmail = async (email, name, startTime, endTime) => {
 
 const useSendgrid = (sgMail, mail) => {
     sgMail.send(mail)
-    .then(() => {
-        console.log('Email sent')
-        // console.log('mail-sent-successfully', { templateId, dynamic_template_data });
-        // console.log('response', response);
-    })
-    .catch((error) => {
-        console.error('send-grid-error: ', error.toString());
-    });
+        .then(() => {
+            console.log('Email sent')
+            // console.log('mail-sent-successfully', { templateId, dynamic_template_data });
+            // console.log('response', response);
+        })
+        .catch((error) => {
+            console.error('send-grid-error: ', error.toString());
+        });
 }
 
 module.exports = allowCors(handler);
@@ -180,5 +184,20 @@ const PrintError = (error) => {
         console.error("Request error headers: ", error.response.headers);
     } else {
         console.error(error);
+    }
+}
+
+/**
+ * 
+ * @param {*} time a string representing the date. For example: '2022-01-24T07:06:00-08:00'
+ * @returns a date formatted in MMMM DO YYYY, h:mm a. For example: January 24th 2022, 6:06 am
+ */
+const adjustForDST = (time) => {
+    if (moment(time).isDST()) {
+        // subtract 1 hour
+        return moment(time).tz('America/Los_Angeles').subtract(1, "hour").format('MMMM Do YYYY, h:mm a');
+    } else {
+        // don't subtract
+        return moment(time).tz('America/Los_Angeles').format('MMMM Do YYYY, h:mm a');
     }
 }
