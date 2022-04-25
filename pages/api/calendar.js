@@ -59,7 +59,7 @@ function handler(req, res) {
             }
         });
     }).catch((error) => {
-        PrintError(error);
+        PrintError(error, "GetAccessToken");
     });
 }
 
@@ -74,7 +74,7 @@ const GetAccessToken = async (res) => {
         });
         return res.data.access_token;
     } catch (error) {
-        PrintError(error)
+        PrintError(error, "Get Access Token Function")
         res.status(500).send('Failed to get Access Token. Refresh Token likely expired. Please contact the site admin.'); // 500 error. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
     }
 }
@@ -96,14 +96,14 @@ const CheckAvailability = async (res, calendarId, accessToken, startTime, endTim
                 Authorization: `Bearer ${accessToken}`
             }
         }).catch((error) => {
-            PrintError(error);
+            PrintError(error, "Check availability api call");
             res.status(500).send('Unable to check availability. Please contact the site admin.')
         });
 
         // Parse response and check if there are conflicts
         return res.data.calendars[calendarId].busy.length === 0;
     } catch (error) {
-        PrintError(error);
+        PrintError(error, "Check availability function call");
         res.status(500).send('Unable to check availability. Please contact the site admin.'); // Checking availability encountered an error. Debug CheckAvailability. API Key might be invalid, or the refresh token expired. Debug by generating new Refresh token according to IBM instructions
     }
 }
@@ -127,11 +127,14 @@ const MakeReservation = async (res, calendarId, accessToken, startTime, endTime,
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
+        }).catch((error) => {
+            PrintError(error, "Make reservation api call");
+            res.status(422).send('Unable to make reservation through Google. Please contact the site admin.')
         });
         res.status(201).send('Reservation successfully created');
         return
     } catch (error) {
-        PrintError(error);
+        PrintError(error, "Make reservation function");
         res.status(502).send('Unable to make reservation for an unknown reason. Contact the site admin.'); // 502 error, something went wrong when making the reservation with the post request. Debug MakeReservation, ensure that the Google API has not changed
     }
 }
